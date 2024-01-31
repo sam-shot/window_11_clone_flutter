@@ -1,17 +1,22 @@
-import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:window_11/core/utils/util_functions.dart';
-import 'package:window_11/ui/views/home/home_view.dart';
+import 'package:provider/provider.dart';
+import 'package:window_11/core/model/taskbar_model.dart';
+import 'package:window_11/main.dart';
+import 'package:window_11/ui/views/widgets/window.dart';
 
 class WindowManager extends ChangeNotifier {
   List<WindowModel> allWindows = [];
+  String? activeWindow;
 
-  void newWindow(String id) {
+  void newWindow(String id, BuildContext ctx) {
     if (allWindows.any((e) => e.id == id)) {
       bringToFront(id);
     } else {
       allWindows.add(WindowModel(app: WindowWidget(id: id), id: id));
+      activeWindow = id;
+      navigatorKey!.currentContext!.read<TaskbarModel>().addToTaskbar(id);
       notifyListeners();
     }
   }
@@ -19,19 +24,20 @@ class WindowManager extends ChangeNotifier {
   void removeApp(String id) {
     final currentWindow = allWindows.firstWhere((e) => e.id == id);
     allWindows.remove(currentWindow);
+    if (allWindows.isNotEmpty) {
+      activeWindow = allWindows.last.id;
+    }
+    navigatorKey!.currentContext!.read<TaskbarModel>().removeFromTaskbar(id);
     notifyListeners();
   }
 
   void bringToFront(String id) {
-    allWindows.sort((a, b) {
-      if (a.id == id) {
-        return -1; // 'a' comes before 'b'
-      } else if (b.id == id) {
-        return 1; // 'b' comes before 'a'
-      }
-      return 0; // no change in order
-    });
+    activeWindow = allWindows.firstWhere((e) => e.id == id).id;
     notifyListeners();
+  }
+
+  Color generateColor() {
+    return Colors.primaries[Random().nextInt(Colors.primaries.length)];
   }
 }
 

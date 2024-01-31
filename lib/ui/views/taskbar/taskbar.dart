@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:window_11/core/model/taskbar_model.dart';
+import 'package:window_11/core/model/window_manager.dart';
 import 'package:window_11/core/utils/assets.dart';
 import 'package:window_11/ui/style/colors.dart';
 import 'package:window_11/ui/style/typography.dart';
@@ -43,16 +44,20 @@ class Taskbar extends StatelessWidget {
           Row(
             children: [
               TaskbarIcon(
-                iconPath: AssetData.weather,
+                iconPath: AssetData.windows,
                 onTap: () {
-                  context.read<TaskbarModel>().startMenuOpened = !context.read<TaskbarModel>().startMenuOpened;
+                  context.read<TaskbarModel>().startMenuOpened =
+                      !context.read<TaskbarModel>().startMenuOpened;
                   context.read<TaskbarModel>().updateUI();
                 },
               ),
-              const TaskbarIcon(iconPath: AssetData.weather),
-              const TaskbarIcon(iconPath: AssetData.weather),
-              const TaskbarIcon(iconPath: AssetData.weather),
-              const TaskbarIcon(iconPath: AssetData.weather),
+              ...context.watch<TaskbarModel>().allTaskarItems.map(
+                    (e) => TaskbarIcon(
+                      iconPath: AssetData.weather,
+                      onTap: () =>
+                          context.read<WindowManager>().bringToFront(e),
+                    ),
+                  ),
             ],
           ),
           const Row(
